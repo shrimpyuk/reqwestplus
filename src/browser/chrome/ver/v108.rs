@@ -3,7 +3,7 @@ use boring::ssl::{
 };
 use http::{
     header::{ACCEPT, ACCEPT_ENCODING, ACCEPT_LANGUAGE, UPGRADE_INSECURE_REQUESTS, USER_AGENT},
-    HeaderMap,
+    HeaderMap, HeaderValue,
 };
 use std::sync::Arc;
 
@@ -90,9 +90,7 @@ fn create_headers() -> HeaderMap {
 
     headers.insert(
         "sec-ch-ua",
-        r#"\\\"Not?A_Brand\\\";v=\\\"8\\\", \\\"Chromium\\\";v=\\\"108\\"#
-            .parse()
-            .unwrap(),
+        HeaderValue::from_static("\"Not?A_Brand\"v=\"8\", \"Chromium\";v=\"108\""),
     );
     headers.insert("sec-ch-ua-mobile", "?0".parse().unwrap());
     headers.insert("sec-ch-ua-platform", "\"Windows\"".parse().unwrap());
