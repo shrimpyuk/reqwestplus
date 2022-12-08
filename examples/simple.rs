@@ -5,7 +5,7 @@
 // `tokio = { version = "1", features = ["full"] }`
 #[cfg(not(target_arch = "wasm32"))]
 #[tokio::main]
-async fn main() -> Result<(), reqwest::Error> {
+async fn main() -> Result<(), reqwestls::Error> {
     // Some simple CLI args requirements...
     let url = match std::env::args().nth(1) {
         Some(url) => url,
@@ -17,11 +17,11 @@ async fn main() -> Result<(), reqwest::Error> {
 
     eprintln!("Fetching {:?}...", url);
 
-    // reqwest::get() is a convenience function.
+    // reqwestls::get() is a convenience function.
     //
-    // In most cases, you should create/build a reqwest::Client and reuse
+    // In most cases, you should create/build a reqwestls::Client and reuse
     // it for all requests.
-    let res = reqwest::get(url).await?;
+    let res = reqwestls::get(url).await?;
 
     eprintln!("Response: {:?} {}", res.version(), res.status());
     eprintln!("Headers: {:#?}\n", res.headers());
