@@ -3,7 +3,7 @@ use reqwestls::browser::ChromeVersion;
 fn main() {
     // Build a client to mimic Chrome 106
     let client = reqwestls::blocking::Client::builder()
-        .chrome_builder(ChromeVersion::V106)
+        .chrome_builder(ChromeVersion::V108)
         .build()
         .unwrap();
 
