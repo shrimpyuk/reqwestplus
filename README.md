@@ -1,8 +1,13 @@
-# reqwest-impersonate
+# reqwestplus
 
-A fork of reqwest used to impersonate the Chrome browser. Inspired by [curl-impersonate](https://github.com/lwthiker/curl-impersonate).
+A fork of [reqwest](https://github.com/seanmonstar/reqwest) and [reqwest-impersonate](https://github.com/4JX/reqwest-impersonate) containing additional features like TLS and h2 configurations.
 
-This crate was intended to be an experiment to learn more about TLS and HTTP2 fingerprinting. Some parts of reqwest may not have the code needed to work when used to copy Chrome.
+This fork has features designed to match my specific usecase, and although open source, it isn't intended for general use. I can't guarantee API stability, or that any of additional features will make sense to you.
+
+## Features added
+- Impersonate Chrome's TLS and HTTP/2 fingerprint
+- Change proxy on an initialized client
+
 
 It is currently missing HTTP/2 `PRIORITY` support. (PRs to [h2](https://github.com/hyperium/h2) are welcome)
 
@@ -14,14 +19,14 @@ hyper = { git = "https://github.com/4JX/hyper.git", branch = "v0.14.18-patched" 
 h2 = { git = "https://github.com/4JX/h2.git", branch = "imp" }
 ```
 
-These patches were made specifically for `reqwest-impersonate` to work, but I would appreciate if someone took the time to PR more "proper" versions to the parent projects.
+These patches were made specifically for `reqwestplus` to work, but I would appreciate if someone took the time to PR more "proper" versions to the parent projects.
 
 ## Example
 
 `Cargo.toml`
 
 ```toml
-reqwest-impersonate = { git = "https://github.com/4JX/reqwest-impersonate.git", default-features = false, features = [
+reqwestplus = { git = "https://github.com/ignassew/reqwestplus", default-features = false, features = [
     "chrome",
     "blocking",
 ] }
@@ -30,11 +35,11 @@ reqwest-impersonate = { git = "https://github.com/4JX/reqwest-impersonate.git", 
 `main.rs`
 
 ```rs
-use reqwest_impersonate::browser::ChromeVersion;
+use reqwestplus::browser::ChromeVersion;
 
 fn main() {
     // Build a client to mimic Chrome 104
-    let client = reqwest_impersonate::blocking::Client::builder()
+    let client = reqwestplus::blocking::Client::builder()
         .chrome_builder(ChromeVersion::V104)
         .build()
         .unwrap();

@@ -1,11 +1,10 @@
 [package]
-name = "reqwestls"
+name = "reqwestplus"
 version = "0.11.13" # remember to update html_root_url
-description = "A reqwest fork that contains additional TLS and h2 configurations"
+description = "A reqwest fork that contains additional features like TLS and h2 configurations"
 keywords = ["http", "request", "client"]
 categories = ["web-programming::http-client", "wasm"]
-repository = "https://github.com/seanmonstar/reqwest"
-documentation = "https://docs.rs/reqwest"
+repository = "https://github.com/ignassew/reqwestplus"
 authors = ["Sean McArthur <sean@seanmonstar.com>", "ignassew"]
 readme = "README.md"
 license = "MIT/Apache-2.0"

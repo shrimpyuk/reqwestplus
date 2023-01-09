@@ -3,7 +3,7 @@ mod support;
 use futures_util::stream::StreamExt;
 use support::*;
 
-use reqwest::Client;
+use reqwestplus::Client;
 
 #[tokio::test]
 async fn auto_headers() {
@@ -35,7 +35,7 @@ async fn auto_headers() {
     });
 
     let url = format!("http://{}/1", server.addr());
-    let res = reqwest::Client::builder()
+    let res = reqwestplus::Client::builder()
         .no_proxy()
         .build()
         .unwrap()
@@ -45,20 +45,20 @@ async fn auto_headers() {
         .unwrap();
 
     assert_eq!(res.url().as_str(), &url);
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
     assert_eq!(res.remote_addr(), Some(server.addr()));
 }
 
 #[tokio::test]
 async fn user_agent() {
     let server = server::http(move |req| async move {
-        assert_eq!(req.headers()["user-agent"], "reqwest-test-agent");
+        assert_eq!(req.headers()["user-agent"], "reqwestplus-test-agent");
         http::Response::default()
     });
 
     let url = format!("http://{}/ua", server.addr());
-    let res = reqwest::Client::builder()
-        .user_agent("reqwest-test-agent")
+    let res = reqwestplus::Client::builder()
+        .user_agent("reqwestplus-test-agent")
         .build()
         .expect("client builder")
         .get(&url)
@@ -66,7 +66,7 @@ async fn user_agent() {
         .await
         .expect("request");
 
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
 }
 
 #[tokio::test]
@@ -153,7 +153,7 @@ async fn body_pipe_response() {
         .await
         .expect("get1");
 
-    assert_eq!(res1.status(), reqwest::StatusCode::OK);
+    assert_eq!(res1.status(), reqwestplus::StatusCode::OK);
     assert_eq!(res1.content_length(), Some(7));
 
     // and now ensure we can "pipe" the response to another request
@@ -164,7 +164,7 @@ async fn body_pipe_response() {
         .await
         .expect("res2");
 
-    assert_eq!(res2.status(), reqwest::StatusCode::OK);
+    assert_eq!(res2.status(), reqwestplus::StatusCode::OK);
 }
 
 #[tokio::test]
@@ -178,14 +178,14 @@ async fn overridden_dns_resolution_with_gai() {
         overridden_domain,
         server.addr().port()
     );
-    let client = reqwest::Client::builder()
+    let client = reqwestplus::Client::builder()
         .resolve(overridden_domain, server.addr())
         .build()
         .expect("client builder");
     let req = client.get(&url);
     let res = req.send().await.expect("request");
 
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
     let text = res.text().await.expect("Failed to get text");
     assert_eq!("Hello", text);
 }
@@ -203,7 +203,7 @@ async fn overridden_dns_resolution_with_gai_multiple() {
     );
     // the server runs on IPv4 localhost, so provide both IPv4 and IPv6 and let the happy eyeballs
     // algorithm decide which address to use.
-    let client = reqwest::Client::builder()
+    let client = reqwestplus::Client::builder()
         .resolve_to_addrs(
             overridden_domain,
             &[
@@ -219,7 +219,7 @@ async fn overridden_dns_resolution_with_gai_multiple() {
     let req = client.get(&url);
     let res = req.send().await.expect("request");
 
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
     let text = res.text().await.expect("Failed to get text");
     assert_eq!("Hello", text);
 }
@@ -236,7 +236,7 @@ async fn overridden_dns_resolution_with_trust_dns() {
         overridden_domain,
         server.addr().port()
     );
-    let client = reqwest::Client::builder()
+    let client = reqwestplus::Client::builder()
         .resolve(overridden_domain, server.addr())
         .trust_dns(true)
         .build()
@@ -244,7 +244,7 @@ async fn overridden_dns_resolution_with_trust_dns() {
     let req = client.get(&url);
     let res = req.send().await.expect("request");
 
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
     let text = res.text().await.expect("Failed to get text");
     assert_eq!("Hello", text);
 }
@@ -263,7 +263,7 @@ async fn overridden_dns_resolution_with_trust_dns_multiple() {
     );
     // the server runs on IPv4 localhost, so provide both IPv4 and IPv6 and let the happy eyeballs
     // algorithm decide which address to use.
-    let client = reqwest::Client::builder()
+    let client = reqwestplus::Client::builder()
         .resolve_to_addrs(
             overridden_domain,
             &[
@@ -280,7 +280,7 @@ async fn overridden_dns_resolution_with_trust_dns_multiple() {
     let req = client.get(&url);
     let res = req.send().await.expect("request");
 
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
     let text = res.text().await.expect("Failed to get text");
     assert_eq!("Hello", text);
 }
@@ -290,7 +290,7 @@ async fn overridden_dns_resolution_with_trust_dns_multiple() {
 fn use_preconfigured_tls_with_bogus_backend() {
     struct DefinitelyNotTls;
 
-    reqwest::Client::builder()
+    reqwestplus::Client::builder()
         .use_preconfigured_tls(DefinitelyNotTls)
         .build()
         .expect_err("definitely is not TLS");
@@ -305,7 +305,7 @@ fn use_preconfigured_native_tls_default() {
         .build()
         .expect("tls builder");
 
-    reqwest::Client::builder()
+    reqwestplus::Client::builder()
         .use_preconfigured_tls(tls)
         .build()
         .expect("preconfigured default tls");
@@ -322,7 +322,7 @@ fn use_preconfigured_rustls_default() {
         .with_root_certificates(root_cert_store)
         .with_no_client_auth();
 
-    reqwest::Client::builder()
+    reqwestplus::Client::builder()
         .use_preconfigured_tls(tls)
         .build()
         .expect("preconfigured rustls tls");
@@ -335,7 +335,7 @@ async fn http2_upgrade() {
     let server = server::http(move |_| async move { http::Response::default() });
 
     let url = format!("https://localhost:{}", server.addr().port());
-    let res = reqwest::Client::builder()
+    let res = reqwestplus::Client::builder()
         .danger_accept_invalid_certs(true)
         .use_rustls_tls()
         .build()
@@ -345,14 +345,14 @@ async fn http2_upgrade() {
         .await
         .expect("request");
 
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
-    assert_eq!(res.version(), reqwest::Version::HTTP_2);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
+    assert_eq!(res.version(), reqwestplus::Version::HTTP_2);
 }
 
 #[cfg(feature = "default-tls")]
 #[tokio::test]
 async fn test_allowed_methods() {
-    let resp = reqwest::Client::builder()
+    let resp = reqwestplus::Client::builder()
         .https_only(true)
         .build()
         .expect("client builder")
@@ -362,7 +362,7 @@ async fn test_allowed_methods() {
 
     assert!(resp.is_ok());
 
-    let resp = reqwest::Client::builder()
+    let resp = reqwestplus::Client::builder()
         .https_only(true)
         .build()
         .expect("client builder")

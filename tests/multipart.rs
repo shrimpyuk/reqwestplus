@@ -7,7 +7,7 @@ use support::*;
 async fn text_part() {
     let _ = env_logger::try_init();
 
-    let form = reqwest::multipart::Form::new().text("foo", "bar");
+    let form = reqwestplus::multipart::Form::new().text("foo", "bar");
 
     let expected_body = format!(
         "\
@@ -45,7 +45,7 @@ async fn text_part() {
 
     let url = format!("http://{}/multipart/1", server.addr());
 
-    let res = reqwest::Client::new()
+    let res = reqwestplus::Client::new()
         .post(&url)
         .multipart(form)
         .send()
@@ -53,7 +53,7 @@ async fn text_part() {
         .unwrap();
 
     assert_eq!(res.url().as_str(), &url);
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
 }
 
 #[cfg(feature = "stream")]
@@ -63,12 +63,13 @@ async fn stream_part() {
 
     let _ = env_logger::try_init();
 
-    let stream = reqwest::Body::wrap_stream(stream::once(future::ready(Ok::<_, reqwest::Error>(
-        "part1 part2".to_owned(),
-    ))));
-    let part = reqwest::multipart::Part::stream(stream);
+    let stream =
+        reqwestplus::Body::wrap_stream(stream::once(future::ready(Ok::<_, reqwestplus::Error>(
+            "part1 part2".to_owned(),
+        ))));
+    let part = reqwestplus::multipart::Part::stream(stream);
 
-    let form = reqwest::multipart::Form::new()
+    let form = reqwestplus::multipart::Form::new()
         .text("foo", "bar")
         .part("part_stream", part);
 
@@ -110,7 +111,7 @@ async fn stream_part() {
 
     let url = format!("http://{}/multipart/1", server.addr());
 
-    let client = reqwest::Client::new();
+    let client = reqwestplus::Client::new();
 
     let res = client
         .post(&url)
@@ -119,7 +120,7 @@ async fn stream_part() {
         .await
         .expect("Failed to post multipart");
     assert_eq!(res.url().as_str(), &url);
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
 }
 
 #[cfg(feature = "blocking")]
@@ -127,7 +128,7 @@ async fn stream_part() {
 fn blocking_file_part() {
     let _ = env_logger::try_init();
 
-    let form = reqwest::blocking::multipart::Form::new()
+    let form = reqwestplus::blocking::multipart::Form::new()
         .file("foo", "Cargo.lock")
         .unwrap();
 
@@ -172,12 +173,12 @@ fn blocking_file_part() {
 
     let url = format!("http://{}/multipart/2", server.addr());
 
-    let res = reqwest::blocking::Client::new()
+    let res = reqwestplus::blocking::Client::new()
         .post(&url)
         .multipart(form)
         .send()
         .unwrap();
 
     assert_eq!(res.url().as_str(), &url);
-    assert_eq!(res.status(), reqwest::StatusCode::OK);
+    assert_eq!(res.status(), reqwestplus::StatusCode::OK);
 }

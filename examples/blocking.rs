@@ -15,11 +15,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     eprintln!("Fetching {:?}...", url);
 
-    // reqwestls::blocking::get() is a convenience function.
+    // reqwestplus::blocking::get() is a convenience function.
     //
-    // In most cases, you should create/build a reqwestls::Client and reuse
+    // In most cases, you should create/build a reqwestplus::Client and reuse
     // it for all requests.
-    let mut res = reqwestls::blocking::get(url)?;
+    let mut res = reqwestplus::blocking::get(url)?;
 
     eprintln!("Response: {:?} {}", res.version(), res.status());
     eprintln!("Headers: {:#?}\n", res.headers());

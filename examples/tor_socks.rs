@@ -4,13 +4,14 @@
 //
 // `tokio = { version = "1", features = ["full"] }`
 #[tokio::main]
-async fn main() -> Result<(), reqwest::Error> {
+async fn main() -> Result<(), reqwestplus::Error> {
     // Make sure you are running tor and this is your socks port
-    let proxy = reqwest::Proxy::all("socks5h://127.0.0.1:9050").expect("tor proxy should be there");
-    let client = reqwest::Client::builder()
+    let proxy =
+        reqwestplus::Proxy::all("socks5h://127.0.0.1:9050").expect("tor proxy should be there");
+    let client = reqwestplus::Client::builder()
         .proxy(proxy)
         .build()
-        .expect("should be able to build reqwest client");
+        .expect("should be able to build reqwestplus client");
 
     let res = client.get("https://check.torproject.org").send().await?;
     println!("Status: {}", res.status());

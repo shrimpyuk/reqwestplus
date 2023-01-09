@@ -27,6 +27,7 @@ pub struct Cookie<'a>(cookie_crate::Cookie<'a>);
 ///
 /// For more advanced scenarios, such as needing to serialize the store or
 /// manipulate it between requests, you may refer to the
+/// **Disclaimer: This crate won't work with requestplus due to name inconsistencies.**
 /// [reqwest_cookie_store crate](https://crates.io/crates/reqwest_cookie_store).
 #[derive(Debug, Default)]
 pub struct Jar(RwLock<cookie_store::CookieStore>);
@@ -145,7 +146,7 @@ impl Jar {
     /// # Example
     ///
     /// ```
-    /// use reqwest::{cookie::Jar, Url};
+    /// use reqwestplus::{cookie::Jar, Url};
     ///
     /// let cookie = "foo=bar; Domain=yolo.local";
     /// let url = "https://yolo.local".parse::<Url>().unwrap();
