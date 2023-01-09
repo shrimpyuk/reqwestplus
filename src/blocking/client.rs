@@ -983,6 +983,13 @@ impl Client {
     pub fn execute(&self, request: Request) -> crate::Result<Response> {
         self.inner.execute_request(request)
     }
+
+    /// Changes proxy.
+    /// This method is currently unimplemented due to async complications.
+    /// You can make use of changing proxies in the async implementation.
+    pub fn proxy(&self, _proxy: Proxy) {
+        unimplemented!();
+    }
 }
 
 impl fmt::Debug for Client {
