@@ -18,7 +18,7 @@ use std::future::Future;
 use std::io::{self, IoSlice};
 use std::net::IpAddr;
 use std::pin::Pin;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll};
 use std::time::Duration;
 
@@ -37,7 +37,7 @@ pub(crate) type HttpConnector = hyper::client::HttpConnector<DynResolver>;
 #[derive(Clone)]
 pub(crate) struct Connector {
     inner: Inner,
-    proxies: Arc<Vec<Proxy>>,
+    proxies: Arc<Mutex<Vec<Proxy>>>,
     verbose: verbose::Wrapper,
     timeout: Option<Duration>,
     #[cfg(feature = "__tls")]
@@ -86,7 +86,7 @@ impl Connector {
     #[cfg(not(feature = "__tls"))]
     pub(crate) fn new<T>(
         mut http: HttpConnector,
-        proxies: Arc<Vec<Proxy>>,
+        proxies: Arc<Mutex<Vec<Proxy>>>,
         local_addr: T,
         nodelay: bool,
     ) -> Connector
@@ -107,7 +107,7 @@ impl Connector {
     pub(crate) fn new_default_tls<T>(
         http: HttpConnector,
         tls: TlsConnectorBuilder,
-        proxies: Arc<Vec<Proxy>>,
+        proxies: Arc<Mutex<Vec<Proxy>>>,
         user_agent: Option<HeaderValue>,
         local_addr: T,
         nodelay: bool,
@@ -125,7 +125,7 @@ impl Connector {
     pub(crate) fn from_built_default_tls<T>(
         mut http: HttpConnector,
         tls: TlsConnector,
-        proxies: Arc<Vec<Proxy>>,
+        proxies: Arc<Mutex<Vec<Proxy>>>,
         user_agent: Option<HeaderValue>,
         local_addr: T,
         nodelay: bool,
@@ -150,7 +150,7 @@ impl Connector {
     pub(crate) fn new_boring_tls<T>(
         mut http: HttpConnector,
         tls: Arc<dyn Fn() -> SslConnectorBuilder + Send + Sync>,
-        proxies: Arc<Vec<Proxy>>,
+        proxies: Arc<Mutex<Vec<Proxy>>>,
         user_agent: Option<HeaderValue>,
         local_addr: T,
         nodelay: bool,
@@ -175,7 +175,7 @@ impl Connector {
     pub(crate) fn new_rustls_tls<T>(
         mut http: HttpConnector,
         tls: rustls::ClientConfig,
-        proxies: Arc<Vec<Proxy>>,
+        proxies: Arc<Mutex<Vec<Proxy>>>,
         user_agent: Option<HeaderValue>,
         local_addr: T,
         nodelay: bool,
@@ -186,7 +186,9 @@ impl Connector {
         http.set_local_address(local_addr.into());
         http.enforce_http(false);
 
-        let (tls, tls_proxy) = if proxies.is_empty() {
+        let has_proxies = { proxies.lock().unwrap().is_empty() };
+
+        let (tls, tls_proxy) = if has_proxies {
             let tls = Arc::new(tls);
             (tls.clone(), tls)
         } else {
@@ -576,13 +578,19 @@ impl Service<Uri> for Connector {
     fn call(&mut self, dst: Uri) -> Self::Future {
         log::debug!("starting new connection: {:?}", dst);
         let timeout = self.timeout;
-        for prox in self.proxies.iter() {
-            if let Some(proxy_scheme) = prox.intercept(&dst) {
-                return Box::pin(with_timeout(
-                    self.clone().connect_via_proxy(dst, proxy_scheme),
-                    timeout,
-                ));
-            }
+        // Yes, this could probably be written in one block, but I'm afraid of locking the mutex.
+        let maybe_proxy_scheme = {
+            self.proxies
+                .lock()
+                .unwrap()
+                .iter()
+                .find_map(|p| p.intercept(&dst))
+        };
+        if let Some(proxy_scheme) = maybe_proxy_scheme {
+            return Box::pin(with_timeout(
+                self.clone().connect_via_proxy(dst, proxy_scheme),
+                timeout,
+            ));
         }
 
         Box::pin(with_timeout(

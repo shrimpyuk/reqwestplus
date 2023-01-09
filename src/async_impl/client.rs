@@ -1,7 +1,7 @@
 #[cfg(any(feature = "native-tls", feature = "__rustls",))]
 use std::any::Any;
 use std::net::IpAddr;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use std::{collections::HashMap, convert::TryInto, net::SocketAddr};
 use std::{fmt, str};
@@ -233,7 +233,7 @@ impl ClientBuilder {
         if config.auto_sys_proxy {
             proxies.push(Proxy::system());
         }
-        let proxies = Arc::new(proxies);
+        let proxies = Arc::new(Mutex::new(proxies));
 
         let mut connector = {
             #[cfg(feature = "__tls")]
@@ -557,7 +557,13 @@ impl ClientBuilder {
 
         let hyper_client = builder.build(connector);
 
-        let proxies_maybe_http_auth = proxies.iter().any(|p| p.maybe_has_http_auth());
+        let proxies_maybe_http_auth = {
+            proxies
+                .lock()
+                .unwrap()
+                .iter()
+                .any(|p| p.maybe_has_http_auth())
+        };
 
         Ok(Client {
             inner: Arc::new(ClientRef {
@@ -1677,6 +1683,13 @@ impl Client {
         }
     }
 
+    /// Changes proxy.
+    pub fn proxy(&self, proxy: Proxy) {
+        let new_proxies = vec![proxy];
+        let mut old_proxies = self.inner.proxies.lock().unwrap();
+        *old_proxies = new_proxies;
+    }
+
     fn proxy_auth(&self, dst: &Uri, headers: &mut HeaderMap) {
         if !self.inner.proxies_maybe_http_auth {
             return;
@@ -1693,7 +1706,7 @@ impl Client {
             return;
         }
 
-        for proxy in self.inner.proxies.iter() {
+        for proxy in self.inner.proxies.lock().unwrap().iter() {
             if proxy.is_match(dst) {
                 if let Some(header) = proxy.http_basic_auth(dst) {
                     headers.insert(PROXY_AUTHORIZATION, header);
@@ -1853,7 +1866,7 @@ struct ClientRef {
     redirect_policy: redirect::Policy,
     referer: bool,
     request_timeout: Option<Duration>,
-    proxies: Arc<Vec<Proxy>>,
+    proxies: Arc<Mutex<Vec<Proxy>>>,
     proxies_maybe_http_auth: bool,
     https_only: bool,
 }
@@ -1872,8 +1885,11 @@ impl ClientRef {
 
         f.field("accepts", &self.accepts);
 
-        if !self.proxies.is_empty() {
-            f.field("proxies", &self.proxies);
+        {
+            let proxies = self.proxies.lock().unwrap();
+            if !proxies.is_empty() {
+                f.field("proxies", &proxies);
+            }
         }
 
         if !self.redirect_policy.is_default() {
