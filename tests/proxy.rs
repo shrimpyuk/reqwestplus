@@ -44,6 +44,7 @@ async fn set_http_proxy() {
     let proxy = format!("http://{}", server.addr());
 
     let client = reqwestplus::Client::builder().build().unwrap();
+
     // Set proxy after building the client
     client.proxy(reqwestplus::Proxy::http(&proxy).unwrap());
 
@@ -51,6 +52,11 @@ async fn set_http_proxy() {
 
     assert_eq!(res.url().as_str(), url);
     assert_eq!(res.status(), reqwestplus::StatusCode::OK);
+
+    // Set proxy to an invalid proxy
+    client.proxy(reqwestplus::Proxy::http("http://127.0.0.1:9999").unwrap());
+
+    client.get(url).send().await.unwrap_err();
 }
 
 #[tokio::test]

@@ -555,28 +555,21 @@ impl ClientBuilder {
             builder.http1_allow_obsolete_multiline_headers_in_responses(true);
         }
 
-        let hyper_client = builder.build(connector);
-
-        let proxies_maybe_http_auth = {
-            proxies
-                .lock()
-                .unwrap()
-                .iter()
-                .any(|p| p.maybe_has_http_auth())
-        };
+        let hyper_client = builder.build(connector.clone());
 
         Ok(Client {
             inner: Arc::new(ClientRef {
                 accepts: config.accepts,
                 #[cfg(feature = "cookies")]
                 cookie_store: config.cookie_store,
-                hyper: hyper_client,
+                hyper: Mutex::new(hyper_client),
+                connector,
+                hyper_builder: builder,
                 headers: config.headers,
                 redirect_policy: config.redirect_policy,
                 referer: config.referer,
                 request_timeout: config.timeout,
                 proxies,
-                proxies_maybe_http_auth,
                 https_only: config.https_only,
             }),
         })
@@ -1662,7 +1655,9 @@ impl Client {
 
         *req.headers_mut() = headers.clone();
 
-        let in_flight = self.inner.hyper.request(req);
+        let hyper = { (*self.inner.hyper.lock().unwrap()).clone() };
+
+        let in_flight = hyper.request(req);
 
         Pending {
             inner: PendingInner::Request(PendingRequest {
@@ -1688,10 +1683,17 @@ impl Client {
         let new_proxies = vec![proxy];
         let mut old_proxies = self.inner.proxies.lock().unwrap();
         *old_proxies = new_proxies;
+        self.new_hyper_client();
+    }
+
+    /// Creates a new hyper client to use when switching to new proxies for example.
+    fn new_hyper_client(&self) {
+        let new_client = self.inner.hyper_builder.build(self.inner.connector.clone());
+        *self.inner.hyper.lock().unwrap() = new_client;
     }
 
     fn proxy_auth(&self, dst: &Uri, headers: &mut HeaderMap) {
-        if !self.inner.proxies_maybe_http_auth {
+        if !get_proxies_maybe_http_auth(&self.inner.proxies) {
             return;
         }
 
@@ -1862,12 +1864,13 @@ struct ClientRef {
     #[cfg(feature = "cookies")]
     cookie_store: Option<Arc<dyn cookie::CookieStore>>,
     headers: HeaderMap,
-    hyper: HyperClient,
+    hyper: Mutex<HyperClient>,
+    connector: Connector,
+    hyper_builder: hyper::client::Builder,
     redirect_policy: redirect::Policy,
     referer: bool,
     request_timeout: Option<Duration>,
     proxies: Arc<Mutex<Vec<Proxy>>>,
-    proxies_maybe_http_auth: bool,
     https_only: bool,
 }
 
@@ -1988,7 +1991,8 @@ impl PendingRequest {
 
         *req.headers_mut() = self.headers.clone();
 
-        *self.as_mut().in_flight().get_mut() = self.client.hyper.request(req);
+        let hyper = { (*self.client.hyper.lock().unwrap()).clone() };
+        *self.as_mut().in_flight().get_mut() = hyper.request(req);
 
         true
     }
@@ -2169,7 +2173,8 @@ impl Future for PendingRequest {
 
                             *req.headers_mut() = headers.clone();
                             std::mem::swap(self.as_mut().headers(), &mut headers);
-                            *self.as_mut().in_flight().get_mut() = self.client.hyper.request(req);
+                            let hyper = { (*self.client.hyper.lock().unwrap()).clone() };
+                            *self.as_mut().in_flight().get_mut() = hyper.request(req);
                             continue;
                         }
                         redirect::ActionKind::Stop => {
@@ -2223,6 +2228,14 @@ fn add_cookie_header(headers: &mut HeaderMap, cookie_store: &dyn cookie::CookieS
     if let Some(header) = cookie_store.cookies(url) {
         headers.insert(crate::header::COOKIE, header);
     }
+}
+
+fn get_proxies_maybe_http_auth(proxies: &Mutex<Vec<Proxy>>) -> bool {
+    proxies
+        .lock()
+        .unwrap()
+        .iter()
+        .any(|p| p.maybe_has_http_auth())
 }
 
 #[cfg(test)]
