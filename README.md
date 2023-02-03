@@ -7,6 +7,8 @@ This fork has features designed to match my specific usecase, and although open 
 ## Features added
 - Impersonate Chrome's TLS and HTTP/2 fingerprint
 - Change proxy on an initialized client
+- Custom header order with custom implementation of http's HeaderMap that preserves the insert order, and `header_order` option in ClientBuilder
+- Ability to disable default `accept` header with `accept_header` option in ClientBuilder
 
 
 It is currently missing HTTP/2 `PRIORITY` support. (PRs to [h2](https://github.com/hyperium/h2) are welcome)
@@ -17,6 +19,7 @@ It is currently missing HTTP/2 `PRIORITY` support. (PRs to [h2](https://github.c
 [patch.crates-io]
 hyper = { git = "https://github.com/4JX/hyper.git", branch = "v0.14.18-patched" }
 h2 = { git = "https://github.com/4JX/h2.git", branch = "imp" }
+http = { git = "https://github.com/ignassew/http-ordered" }
 ```
 
 These patches were made specifically for `reqwestplus` to work, but I would appreciate if someone took the time to PR more "proper" versions to the parent projects.
