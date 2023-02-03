@@ -12,7 +12,7 @@ use http::header::{
     CONTENT_TYPE, LOCATION, PROXY_AUTHORIZATION, RANGE, REFERER, TRANSFER_ENCODING, USER_AGENT,
 };
 use http::uri::Scheme;
-use http::Uri;
+use http::{Uri, HeaderName};
 use hyper::client::{HttpConnector, ResponseFuture};
 #[cfg(feature = "native-tls-crate")]
 use native_tls_crate::TlsConnector;
@@ -133,7 +133,8 @@ struct Config {
     https_only: bool,
     dns_overrides: HashMap<String, Vec<SocketAddr>>,
     dns_resolver: Option<Arc<dyn Resolve>>,
-    accept_header: bool
+    accept_header: bool,
+    header_order: Vec<HeaderName>
 }
 
 impl Default for ClientBuilder {
@@ -207,7 +208,8 @@ impl ClientBuilder {
                 https_only: false,
                 dns_overrides: HashMap::new(),
                 dns_resolver: None,
-                accept_header: true
+                accept_header: true,
+                header_order: Vec::new()
             },
         }
     }
@@ -577,6 +579,7 @@ impl ClientBuilder {
                 request_timeout: config.timeout,
                 proxies,
                 https_only: config.https_only,
+                header_order: config.header_order
             }),
         })
     }
@@ -1489,6 +1492,17 @@ impl ClientBuilder {
         self.config.accept_header = enabled;
         self
     }
+
+    /// Change the order in which headers will be sent
+    ///
+    /// Warning
+    ///
+    /// The host header needs to be manually inserted if you want to modify its order.
+    /// Otherwise it will be inserted by hyper after sorting.
+    pub fn header_order(mut self, order: Vec<HeaderName>) -> ClientBuilder {
+        self.config.header_order = order;
+        self
+    }
 }
 
 type HyperClient = hyper::Client<Connector, super::body::ImplStream>;
@@ -1666,6 +1680,12 @@ impl Client {
             .or(self.inner.request_timeout)
             .map(tokio::time::sleep)
             .map(Box::pin);
+
+        headers.sort_by(|k1, _, k2, _| {
+            let p1 = self.inner.header_order.iter().position(|h| h == k1);
+            let p2 = self.inner.header_order.iter().position(|h| h == k2);
+            p1.cmp(&p2)
+        });
 
         *req.headers_mut() = headers.clone();
 
@@ -1886,6 +1906,7 @@ struct ClientRef {
     request_timeout: Option<Duration>,
     proxies: Arc<Mutex<Vec<Proxy>>>,
     https_only: bool,
+    header_order: Vec<HeaderName>
 }
 
 impl ClientRef {
