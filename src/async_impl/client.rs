@@ -133,6 +133,7 @@ struct Config {
     https_only: bool,
     dns_overrides: HashMap<String, Vec<SocketAddr>>,
     dns_resolver: Option<Arc<dyn Resolve>>,
+    accept_header: bool
 }
 
 impl Default for ClientBuilder {
@@ -146,8 +147,7 @@ impl ClientBuilder {
     ///
     /// This is the same as `Client::builder()`.
     pub fn new() -> ClientBuilder {
-        let mut headers: HeaderMap<HeaderValue> = HeaderMap::with_capacity(2);
-        headers.insert(ACCEPT, HeaderValue::from_static("*/*"));
+        let headers = HeaderMap::new();
 
         ClientBuilder {
             config: Config {
@@ -207,6 +207,7 @@ impl ClientBuilder {
                 https_only: false,
                 dns_overrides: HashMap::new(),
                 dns_resolver: None,
+                accept_header: true
             },
         }
     }
@@ -234,6 +235,11 @@ impl ClientBuilder {
             proxies.push(Proxy::system());
         }
         let proxies = Arc::new(Mutex::new(proxies));
+
+        let mut headers = config.headers;
+        if config.accept_header {
+            headers.insert(ACCEPT, HeaderValue::from_static("*/*"));
+        }
 
         let mut connector = {
             #[cfg(feature = "__tls")]
@@ -336,7 +342,7 @@ impl ClientBuilder {
                         http,
                         tls,
                         proxies.clone(),
-                        user_agent(&config.headers),
+                        user_agent(&headers),
                         config.local_address,
                         config.nodelay,
                     )?
@@ -565,7 +571,7 @@ impl ClientBuilder {
                 hyper: Mutex::new(hyper_client),
                 connector,
                 hyper_builder: builder,
-                headers: config.headers,
+                headers,
                 redirect_policy: config.redirect_policy,
                 referer: config.referer,
                 request_timeout: config.timeout,
@@ -1473,6 +1479,14 @@ impl ClientBuilder {
     /// still be applied on top of this resolver.
     pub fn dns_resolver<R: Resolve + 'static>(mut self, resolver: Arc<R>) -> ClientBuilder {
         self.config.dns_resolver = Some(resolver as _);
+        self
+    }
+
+    /// Insert "accept: */*" header at the beginning.
+    ///
+    /// Defaults to true.
+    pub fn accept_header(mut self, enabled: bool) -> ClientBuilder {
+        self.config.accept_header = enabled;
         self
     }
 }
