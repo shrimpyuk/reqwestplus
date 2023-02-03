@@ -288,3 +288,4 @@ required-features = ["multipart"]
 [patch.crates-io]
 hyper = { git = "https://github.com/4JX/hyper.git", branch = "v0.14.18-patched", ref = "bd25359" }
 h2 = { git = "https://github.com/4JX/h2.git", ref = "b088466" }
+http = { git = "https://github.com/ignassew/http-ordered", package = "http-ordered" }

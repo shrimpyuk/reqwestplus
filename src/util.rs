@@ -1,4 +1,6 @@
-use crate::header::{Entry, HeaderMap, OccupiedEntry};
+use http::header::HeaderName;
+
+use crate::header::{Entry, HeaderMap};
 
 // xor-shift
 #[cfg(not(target_arch = "wasm32"))]
@@ -37,31 +39,34 @@ pub(crate) fn fast_random() -> u64 {
     })
 }
 
+#[allow(unused)]
 pub(crate) fn replace_headers(dst: &mut HeaderMap, src: HeaderMap) {
     // IntoIter of HeaderMap yields (Option<HeaderName>, HeaderValue).
     // The first time a name is yielded, it will be Some(name), and if
     // there are more values with the same name, the next yield will be
     // None.
 
-    let mut prev_entry: Option<OccupiedEntry<_>> = None;
+    let mut prev_key: Option<HeaderName> = None;
     for (key, value) in src {
         match key {
-            Some(key) => match dst.entry(key) {
-                Entry::Occupied(mut e) => {
-                    e.insert(value);
-                    prev_entry = Some(e);
-                }
-                Entry::Vacant(e) => {
-                    let e = e.insert_entry(value);
-                    prev_entry = Some(e);
-                }
+            Some(key) => {
+                match dst.entry(&key) {
+                    Entry::Occupied(mut e) => _ = e.insert(value),
+                    Entry::Vacant(e) => _ = e.insert(value),
+                };
+
+                prev_key = Some(key)
             },
-            None => match prev_entry {
-                Some(ref mut entry) => {
-                    entry.append(value);
-                }
-                None => unreachable!("HeaderMap::into_iter yielded None first"),
+            None => {
+                let prev_key = prev_key.as_ref().expect("HeaderMap::into_iter won't yield None first");
+
+                match dst.entry(prev_key) {
+                    Entry::Occupied(mut e) => _ = e.append(value),
+                    Entry::Vacant(e) => unreachable!("HeaderMap::into_iter yielded None first"),
+                };
             },
-        }
+        };
+
+        
     }
 }
