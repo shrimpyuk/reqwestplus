@@ -1,9 +1,9 @@
 use reqwestplus::browser::ChromeVersion;
 
 fn main() {
-    // Build a client to mimic Chrome 106
+    // Build a client to mimic latest chrome
     let client = reqwestplus::blocking::Client::builder()
-        .chrome_builder(ChromeVersion::V108)
+        .chrome_builder(ChromeVersion::V110)
         .build()
         .unwrap();
 
