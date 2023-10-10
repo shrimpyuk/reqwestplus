@@ -8,6 +8,7 @@ mod v106;
 mod v108;
 mod v110;
 mod v106_110;
+mod v117;
 
 pub(super) fn get_config_from_ver(ver: ChromeVersion) -> BrowserSettings {
     match ver {
@@ -16,5 +17,6 @@ pub(super) fn get_config_from_ver(ver: ChromeVersion) -> BrowserSettings {
         ChromeVersion::V106 => v106_110::get_settings(v106::create_headers()),
         ChromeVersion::V108 => v106_110::get_settings(v108::create_headers()),
         ChromeVersion::V110 => v106_110::get_settings(v110::create_headers()),
+        ChromeVersion::V117 => v106_110::get_settings(v117::create_headers()),
     }
 }

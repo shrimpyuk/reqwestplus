@@ -4,7 +4,7 @@ version = "0.11.13" # remember to update html_root_url
 description = "A reqwest fork that contains additional features like TLS and h2 configurations"
 keywords = ["http", "request", "client"]
 categories = ["web-programming::http-client", "wasm"]
-repository = "https://github.com/ignassew/reqwestplus"
+repository = "https://github.com/shrimpyuk/reqwestplus"
 authors = ["Sean McArthur <sean@seanmonstar.com>", "ignassew"]
 readme = "README.md"
 license = "MIT/Apache-2.0"
@@ -144,10 +144,10 @@ rustls-native-certs = { version = "0.6", optional = true }
 rustls-pemfile = { version = "1.0", optional = true }
 
 ## boring-tls
-hyper-boring = { git = "https://github.com/4JX/boring", rev = "2a7463a", optional = true }
-boring = { git = "https://github.com/4JX/boring", rev = "2a7463a", optional = true }
-tokio-boring = { git = "https://github.com/4JX/boring", rev = "2a7463a", optional = true }
-boring-sys = { git = "https://github.com/4JX/boring", rev = "2a7463a", optional = true }
+hyper-boring = { git = "https://github.com/shrimpyuk/boring", branch = "patched", optional = true }
+boring = { git = "https://github.com/shrimpyuk/boring", branch = "patched", optional = true }
+tokio-boring = { git = "https://github.com/shrimpyuk/boring", branch = "patched", optional = true }
+boring-sys = { git = "https://github.com/shrimpyuk/boring", branch = "patched", optional = true }
 foreign-types = { version = "0.5.0", optional = true }
 
 ## cookies
