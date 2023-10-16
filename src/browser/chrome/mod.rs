@@ -20,6 +20,8 @@ pub(crate) fn configure_chrome(ver: ChromeVersion, builder: ClientBuilder) -> Cl
         .gzip(settings.gzip)
 }
 
+
+
 /// Defines the Chrome version to mimic when setting up a builder
 #[derive(Debug)]
 #[allow(missing_docs)]
@@ -32,4 +34,33 @@ pub enum ChromeVersion {
     V117,
     V118,
     Latest,
+}
+
+pub fn get_chrome_useragent(version: ChromeVersion) -> String {
+    match version {
+        ChromeVersion::V104 => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
+        ),
+        ChromeVersion::V105 => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+        ),
+        ChromeVersion::V106 => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+        ),
+        ChromeVersion::V108 => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+        ),
+        ChromeVersion::V110 => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+        ),
+        ChromeVersion::V117 => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
+        ),
+        ChromeVersion::V118 => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+        ),
+        ChromeVersion::Latest => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+        ),
+    }
 }
