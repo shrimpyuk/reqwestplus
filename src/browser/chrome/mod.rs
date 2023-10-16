@@ -36,7 +36,13 @@ pub enum ChromeVersion {
     Latest,
 }
 
-pub fn get_chrome_useragent(version: ChromeVersion) -> String {
+impl ChromeVersion {
+    pub fn get_useragent(&self) -> String {
+        get_chrome_useragent(self)
+    }
+}
+
+pub fn get_chrome_useragent(version: &ChromeVersion) -> String {
     match version {
         ChromeVersion::V104 => String::from(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
