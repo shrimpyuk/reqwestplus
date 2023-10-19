@@ -1752,6 +1752,18 @@ impl Client {
             }
         }
     }
+
+    fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<cookie_store::Cookie<'static>>, Box<dyn std::error::Error>> {
+        let target_url = Url::parse(url)?;
+
+        // Lock the store and collect the cookies for the domain
+        let cookie_store = self.inner.cookie_store.lock().unwrap();
+        let cookies = cookie_store.iter_domain(&target_url.domain().unwrap())
+            .cloned() // Clone the cookies to return owned data
+            .collect::<Vec<_>>();
+
+        Ok(cookies)
+    }
 }
 
 impl fmt::Debug for Client {
