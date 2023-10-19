@@ -1712,7 +1712,7 @@ impl Client {
         }
     }
     #[cfg(feature = "cookies")]
-    pub(super) fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<Cookie>, Box<dyn std::error::Error>> {
+    pub(super) fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<cookie::Cookie>, Box<dyn std::error::Error>> {
         let target_url = Url::parse(url)?;
 
         // Check if the cookie_store is set
@@ -1723,7 +1723,7 @@ impl Client {
                 let header_str = cookie_header.to_str()?;
 
                 // Parse the header string into individual `cookie::Cookie` items
-                let cookies: Vec<Cookie> = header_str
+                let cookies: Vec<cookie::Cookie> = header_str
                     .split(';')
                     .filter_map(|cookie_str| {
                         // Parse each individual cookie string, ignore if parsing fails
