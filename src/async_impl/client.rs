@@ -20,7 +20,6 @@ use pin_project_lite::pin_project;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use cookie_crate::ParseError;
 use tokio::time::Sleep;
 
 use log::{debug, trace};
@@ -47,7 +46,6 @@ use crate::Certificate;
 #[cfg(any(feature = "native-tls", feature = "__rustls"))]
 use crate::Identity;
 use crate::{IntoUrl, Method, Proxy, StatusCode, Url};
-use crate::cookie::Cookie;
 
 /// An asynchronous `Client` to make Requests with.
 ///
@@ -1713,6 +1711,36 @@ impl Client {
             }),
         }
     }
+    #[cfg(feature = "cookies")]
+    pub(super) fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<Cookie>, Box<dyn std::error::Error>> {
+        let target_url = Url::parse(url)?;
+
+        // Check if the cookie_store is set
+        if let Some(cookie_store) = self.inner.cookie_store.as_ref() {
+            // Retrieve the HeaderValue containing the cookies, if present
+            if let Some(cookie_header) = cookie_store.cookies(&target_url) {
+                // Convert HeaderValue to str
+                let header_str = cookie_header.to_str()?;
+
+                // Parse the header string into individual `cookie::Cookie` items
+                let cookies: Vec<Cookie> = header_str
+                    .split(';')
+                    .filter_map(|cookie_str| {
+                        // Parse each individual cookie string, ignore if parsing fails
+                        cookie_str.trim().parse().ok()
+                    })
+                    .collect();
+
+                Ok(cookies)
+            } else {
+                // No cookies are present for the specified URL
+                Ok(Vec::new())
+            }
+        } else {
+            // If no cookie store is configured, return an empty Vec
+            Ok(Vec::new())
+        }
+    }
 
     /// Changes proxy.
     pub fn proxy(&self, proxy: Proxy) {
@@ -1751,29 +1779,6 @@ impl Client {
                 }
 
                 break;
-            }
-        }
-    }
-
-    pub fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<Cookie>, Box<dyn std::error::Error>> {
-        let target_url = Url::parse(url)?;
-
-        // Lock the store and collect the cookies for the domain
-        let cookie_store = self.inner.cookie_store.unwrap();
-        let cookie_header = cookie_store.cookies(&target_url);
-        match cookie_header {
-            Some(header) => {
-                let header_str = header.to_str()?;
-
-                // Parse the header string into individual `cookie::Cookie` items
-                let cookies: Result<Vec<Cookie>, ParseError> = header_str
-                    .split(';')
-                    .map(|cookie_str| cookie_str.trim().parse())
-                    .collect();
-                Ok(cookies?)
-            },
-            None => {
-                return Ok(Vec::new());
             }
         }
     }
