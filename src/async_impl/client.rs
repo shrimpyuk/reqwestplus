@@ -1753,7 +1753,7 @@ impl Client {
         }
     }
 
-    fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<cookie_store::Cookie<'static>>, Box<dyn std::error::Error>> {
+    pub fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<cookie_store::Cookie<'static>>, Box<dyn std::error::Error>> {
         let target_url = Url::parse(url)?;
 
         // Lock the store and collect the cookies for the domain
