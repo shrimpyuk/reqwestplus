@@ -1712,11 +1712,12 @@ impl Client {
         }
     }
     #[cfg(feature = "cookies")]
-    pub(super) fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<cookie::Cookie>, Box<dyn std::error::Error>> {
+    pub fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<cookie::Cookie>, Box<dyn std::error::Error>> {
+        // Parse the URL
         let target_url = Url::parse(url)?;
 
         // Check if the cookie_store is set
-        if let Some(cookie_store) = self.inner.cookie_store.as_ref() {
+        if let Some(cookie_store) = &self.inner.cookie_store {
             // Retrieve the HeaderValue containing the cookies, if present
             if let Some(cookie_header) = cookie_store.cookies(&target_url) {
                 // Convert HeaderValue to str
@@ -1726,8 +1727,8 @@ impl Client {
                 let cookies: Vec<cookie::Cookie> = header_str
                     .split(';')
                     .filter_map(|cookie_str| {
-                        // Parse each individual cookie string, ignore if parsing fails
-                        cookie_str.trim().parse().ok()
+                        // Parse each individual cookie string using the `Cookie::parse` method, ignore if parsing fails
+                        cookie::Cookie::parse(cookie_str.trim().as_ref()).ok()
                     })
                     .collect();
 

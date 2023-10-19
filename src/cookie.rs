@@ -35,7 +35,7 @@ pub struct Jar(RwLock<cookie_store::CookieStore>);
 // ===== impl Cookie =====
 
 impl<'a> Cookie<'a> {
-    fn parse(value: &'a HeaderValue) -> Result<Cookie<'a>, CookieParseError> {
+    pub(crate) fn parse(value: &'a HeaderValue) -> Result<Cookie<'a>, CookieParseError> {
         std::str::from_utf8(value.as_bytes())
             .map_err(cookie_crate::ParseError::from)
             .and_then(cookie_crate::Cookie::parse)
