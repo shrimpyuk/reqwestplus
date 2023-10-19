@@ -1711,8 +1711,14 @@ impl Client {
             }),
         }
     }
+
+    /// Returns a `String` of the header-value of all `Cookie` in a `Url`.
+    ///
+    /// # Errors
+    ///
+    /// This method fails if there was an error parsing the cookies.
     #[cfg(feature = "cookies")]
-    pub fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<cookie::Cookie>, Box<dyn std::error::Error>> {
+    pub fn get_cookies_for_domain(&self, url: &str) -> Result<String, Box<dyn std::error::Error>> {
         // Parse the URL
         let target_url = Url::parse(url)?;
 
@@ -1722,25 +1728,14 @@ impl Client {
             if let Some(cookies_header) = cookie_store.cookies(&target_url) {
                 let cookies_str = cookies_header.to_str()?;
 
-                // Split the header into individual cookie strings
-                let cookies_split: Vec<&str> = cookies_str.split("; ").collect();
-
-                // Parse each cookie string into a Cookie after wrapping it into a HeaderValue
-                let mut cookies = Vec::new();
-                for cookie_str in cookies_split {
-                    let individual_header_value = HeaderValue::from_str(cookie_str)?;
-                    let cookie = cookie::Cookie::parse(&individual_header_value)?;
-                    cookies.push(cookie);
-                }
-
-                Ok(cookies)
+                Ok(cookies_str.to_owned())
             } else {
                 // No cookies are present for the specified URL
-                Ok(Vec::new())
+                Ok("".to_string())
             }
         } else {
             // If no cookie store is configured, return an empty Vec
-            Ok(Vec::new())
+            Ok("".to_string())
         }
     }
 
