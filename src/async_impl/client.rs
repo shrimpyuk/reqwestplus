@@ -20,6 +20,7 @@ use pin_project_lite::pin_project;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use cookie_crate::ParseError;
 use tokio::time::Sleep;
 
 use log::{debug, trace};
@@ -46,6 +47,7 @@ use crate::Certificate;
 #[cfg(any(feature = "native-tls", feature = "__rustls"))]
 use crate::Identity;
 use crate::{IntoUrl, Method, Proxy, StatusCode, Url};
+use crate::cookie::Cookie;
 
 /// An asynchronous `Client` to make Requests with.
 ///
@@ -1753,16 +1755,27 @@ impl Client {
         }
     }
 
-    pub fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<cookie_store::Cookie<'static>>, Box<dyn std::error::Error>> {
+    pub fn get_cookies_for_domain(&self, url: &str) -> Result<Vec<Cookie>, Box<dyn std::error::Error>> {
         let target_url = Url::parse(url)?;
 
         // Lock the store and collect the cookies for the domain
         let cookie_store = self.inner.cookie_store.unwrap();
-        let cookies = cookie_store.iter_domain(&target_url.domain().unwrap())
-            .cloned() // Clone the cookies to return owned data
-            .collect::<Vec<_>>();
+        let cookie_header = cookie_store.cookies(&target_url);
+        match cookie_header {
+            Some(header) => {
+                let header_str = header.to_str()?;
 
-        Ok(cookies)
+                // Parse the header string into individual `cookie::Cookie` items
+                let cookies: Result<Vec<Cookie>, ParseError> = header_str
+                    .split(';')
+                    .map(|cookie_str| cookie_str.trim().parse())
+                    .collect();
+                Ok(cookies?)
+            },
+            None => {
+                return Ok(Vec::new());
+            }
+        }
     }
 }
 
