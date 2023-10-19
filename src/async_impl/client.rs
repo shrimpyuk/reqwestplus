@@ -1719,20 +1719,19 @@ impl Client {
         // Check if the cookie_store is set
         if let Some(cookie_store) = &self.inner.cookie_store {
             // Retrieve the HeaderValue containing the cookies, if present
-            if let Some(cookie_header) = cookie_store.cookies(&target_url) {
-                // Convert HeaderValue to str
-                let header_str = cookie_header.to_str()?;
+            if let Some(cookies_header) = cookie_store.cookies(&target_url) {
+                let cookies_str = cookies_header.to_str()?;
 
-                // Parse the header string into individual `cookie::Cookie` items
-                let cookies: Vec<cookie::Cookie> = header_str
-                    .split(';')
-                    .filter_map(|cookie_str| {
-                        // Parse each individual cookie string using the `Cookie::parse` method, ignore if parsing fails
-                        let header_value = HeaderValue::from_str(cookie_str.trim()).ok()?;
+                // Split the header into individual cookie strings
+                let cookies_split: Vec<&str> = cookies_str.split("; ").collect();
 
-                        cookie::Cookie::parse(&header_value).ok()
-                    })
-                    .collect();
+                // Parse each cookie string into a Cookie after wrapping it into a HeaderValue
+                let mut cookies = Vec::new();
+                for cookie_str in cookies_split {
+                    let individual_header_value = HeaderValue::from_str(cookie_str)?;
+                    let cookie = cookie::Cookie::parse(&individual_header_value)?;
+                    cookies.push(cookie);
+                }
 
                 Ok(cookies)
             } else {
