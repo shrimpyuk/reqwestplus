@@ -1757,7 +1757,7 @@ impl Client {
         let target_url = Url::parse(url)?;
 
         // Lock the store and collect the cookies for the domain
-        let cookie_store = self.inner.cookie_store.lock().unwrap();
+        let cookie_store = self.inner.cookie_store.unwrap();
         let cookies = cookie_store.iter_domain(&target_url.domain().unwrap())
             .cloned() // Clone the cookies to return owned data
             .collect::<Vec<_>>();
