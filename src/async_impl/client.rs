@@ -1729,6 +1729,7 @@ impl Client {
                     .filter_map(|cookie_str| {
                         // Parse each individual cookie string using the `Cookie::parse` method, ignore if parsing fails
                         let header_value = HeaderValue::from_str(cookie_str.trim())?;
+
                         cookie::Cookie::parse(&header_value).ok()
                     })
                     .collect();
