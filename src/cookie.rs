@@ -7,6 +7,7 @@ use std::time::SystemTime;
 
 use crate::header::{HeaderValue, SET_COOKIE};
 use bytes::Bytes;
+use http::header::InvalidHeaderValue;
 
 /// Actions for a persistent cookie store providing session support.
 pub trait CookieStore: Send + Sync {
@@ -41,6 +42,10 @@ impl<'a> Cookie<'a> {
             .and_then(cookie_crate::Cookie::parse)
             .map_err(CookieParseError)
             .map(Cookie)
+    }
+
+    pub(crate) fn to_header(&self) -> Result<HeaderValue, InvalidHeaderValue> {
+        HeaderValue::from_str(format!("{}={}", self.0.name(), self.0.value()).as_str())
     }
 
     /// The name of the cookie.
