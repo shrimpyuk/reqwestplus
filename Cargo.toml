@@ -94,6 +94,7 @@ bytes = "1.0"
 serde = "1.0"
 serde_urlencoded = "0.7.1"
 tower-service = "0.3"
+cookie = "0.18.0"
 
 # Optional deps...
 

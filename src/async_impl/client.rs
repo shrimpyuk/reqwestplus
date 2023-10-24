@@ -47,7 +47,6 @@ use crate::Certificate;
 #[cfg(any(feature = "native-tls", feature = "__rustls"))]
 use crate::Identity;
 use crate::{IntoUrl, Method, Proxy, StatusCode, Url};
-use crate::cookie::Cookie;
 
 /// An asynchronous `Client` to make Requests with.
 ///
@@ -1747,22 +1746,13 @@ impl Client {
     ///
     /// This method fails if there was an error parsing the cookies.
     #[cfg(feature = "cookies")]
-    pub fn set_cookies(&self, cookies: Vec<Cookie>, url: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn set_cookies(&self, cookies: Vec<HeaderValue>, url: &str) -> Result<(), Box<dyn std::error::Error>> {
         // Parse the URL
         let target_url = Url::parse(url)?;
 
         // Check if the cookie_store is set
         if let Some(cookie_store) = &self.inner.cookie_store {
-            let mut header_values = Vec::new();
-
-            for cookie in cookies {
-                // Try to convert the Cookie to a HeaderValue
-                match cookie.to_header() {
-                    Ok(header_value) => header_values.push(header_value),
-                    Err(e) => return Err(Box::new(e)), // Propagate the error upwards
-                }
-            }
-            let mut iter: Iter<HeaderValue> = header_values.iter();
+            let mut iter: Iter<HeaderValue> = cookies.iter();
             let dynamic_iter: &mut dyn Iterator<Item = &HeaderValue> = &mut iter;
             cookie_store.set_cookies(dynamic_iter, &target_url);
             Ok(())
