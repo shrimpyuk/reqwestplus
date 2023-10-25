@@ -19,7 +19,6 @@ use native_tls_crate::TlsConnector;
 use pin_project_lite::pin_project;
 use std::future::Future;
 use std::pin::Pin;
-use std::slice::{Iter};
 use std::task::{Context, Poll};
 use tokio::time::Sleep;
 

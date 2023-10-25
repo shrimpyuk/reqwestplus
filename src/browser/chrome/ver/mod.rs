@@ -11,7 +11,7 @@ mod v106_118;
 mod v117;
 mod v118;
 
-pub(super) fn get_config_from_ver(mut ver: ChromeVersion) -> BrowserSettings {
+pub(super) fn get_config_from_ver(ver: ChromeVersion) -> BrowserSettings {
     match ver {
         ChromeVersion::V104 => v104::get_settings(),
         ChromeVersion::V105 => v105::get_settings(),
