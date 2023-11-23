@@ -20,8 +20,6 @@ pub(crate) fn configure_chrome(ver: ChromeVersion, builder: ClientBuilder) -> Cl
         .gzip(settings.gzip)
 }
 
-
-
 /// Defines the Chrome version to mimic when setting up a builder
 #[derive(Debug)]
 #[allow(missing_docs)]
@@ -33,6 +31,7 @@ pub enum ChromeVersion {
     V110,
     V117,
     V118,
+    V119,
     Latest,
 }
 
@@ -65,8 +64,11 @@ pub fn get_chrome_useragent(version: &ChromeVersion) -> String {
         ChromeVersion::V118 => String::from(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
         ),
+        ChromeVersion::V119 => String::from(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+        ),
         ChromeVersion::Latest => String::from(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
         ),
     }
 }

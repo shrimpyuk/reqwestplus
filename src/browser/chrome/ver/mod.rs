@@ -5,11 +5,12 @@ use super::ChromeVersion;
 mod v104;
 mod v105;
 mod v106;
+mod v106_118;
 mod v108;
 mod v110;
-mod v106_118;
 mod v117;
 mod v118;
+mod v119;
 
 pub(super) fn get_config_from_ver(ver: ChromeVersion) -> BrowserSettings {
     match ver {
@@ -20,6 +21,7 @@ pub(super) fn get_config_from_ver(ver: ChromeVersion) -> BrowserSettings {
         ChromeVersion::V110 => v106_118::get_settings(v110::create_headers()),
         ChromeVersion::V117 => v106_118::get_settings(v117::create_headers()),
         ChromeVersion::V118 => v106_118::get_settings(v118::create_headers()),
-        ChromeVersion::Latest => v106_118::get_settings(v118::create_headers()),
+        ChromeVersion::V119 => v106_118::get_settings(v119::create_headers()),
+        ChromeVersion::Latest => v106_118::get_settings(v119::create_headers()),
     }
 }
