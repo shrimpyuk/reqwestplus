@@ -41,6 +41,22 @@ impl ChromeVersion {
     }
 }
 
+/// Returns the user agent string for the given ChromeVersion.
+///
+/// # Arguments
+///
+/// * `version` - The ChromeVersion for which to get the user agent string.
+///
+/// # Examples
+///
+/// ```
+/// use chrome_useragent::get_chrome_useragent;
+/// use chrome_useragent::ChromeVersion;
+///
+/// let version = ChromeVersion::V110;
+/// let user_agent = get_chrome_useragent(&version);
+/// println!("User Agent: {}", user_agent);
+/// ```
 pub fn get_chrome_useragent(version: &ChromeVersion) -> String {
     match version {
         ChromeVersion::V104 => String::from(
