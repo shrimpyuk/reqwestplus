@@ -88,7 +88,7 @@ __internal_proxy_sys_no_cache = []
 
 [dependencies]
 base64 = "0.13"
-http = { git = "https://github.com/ignassew/http-ordered.git" }
+http = "0.2.8"
 url = "2.2"
 bytes = "1.0"
 serde = "1.0"
@@ -108,14 +108,14 @@ encoding_rs = "0.8"
 futures-core = { version = "0.3.0", default-features = false }
 futures-util = { version = "0.3.0", default-features = false }
 http-body = "0.4.0"
-hyper = { version = "0.14.28", default-features = false, features = [
+hyper = { version = "0.14.18", default-features = false, features = [
     "tcp",
     "http1",
     "http2",
     "client",
     "runtime",
 ] }
-h2 = "0.3"
+h2 = "0.3.14"
 once_cell = "1"
 log = "0.4"
 mime = "0.3.16"
@@ -173,7 +173,7 @@ trust-dns-resolver = { version = "0.22", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 env_logger = "0.8"
-hyper = { version = "0.14", default-features = false, features = [
+hyper = { version = "0.14.28", default-features = false, features = [
     "tcp",
     "stream",
     "http1",
@@ -287,6 +287,6 @@ path = "tests/multipart.rs"
 required-features = ["multipart"]
 
 [patch.crates-io]
-hyper = { git = "https://github.com/shrimpyuk/hyperplus.git", branch = "0.14.28-patched" }
-#h2 = { git = "https://github.com/4JX/h2.git", branch = "imp" }
-#http = { git = "https://github.com/ignassew/http-ordered" }
+hyper = { git = "https://github.com/4JX/hyper.git", branch = "v0.14.18-patched" }
+h2 = { git = "https://github.com/4JX/h2.git", branch = "imp" }
+http = { git = "https://github.com/ignassew/http-ordered" }
