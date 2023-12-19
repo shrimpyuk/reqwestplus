@@ -208,7 +208,7 @@ impl ClientBuilder {
                 https_only: false,
                 dns_overrides: HashMap::new(),
                 dns_resolver: None,
-                accept_header: false,
+                accept_header: true,
                 header_order: Vec::new()
             },
         }
@@ -1487,7 +1487,7 @@ impl ClientBuilder {
 
     /// Insert "accept: */*" header at the beginning.
     ///
-    /// Defaults to false.
+    /// Defaults to true.
     pub fn accept_header(mut self, enabled: bool) -> ClientBuilder {
         self.config.accept_header = enabled;
         self
