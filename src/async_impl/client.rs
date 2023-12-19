@@ -1751,7 +1751,7 @@ impl Client {
 
         // Check if the cookie_store is set
         if let Some(cookie_store) = &self.inner.cookie_store {
-            let mut iter: Iter<HeaderValue> = cookies.iter();
+            let mut iter: core::slice::Iter<HeaderValue> = cookies.iter();
             let dynamic_iter: &mut dyn Iterator<Item = &HeaderValue> = &mut iter;
             cookie_store.set_cookies(dynamic_iter, &target_url);
             Ok(())
