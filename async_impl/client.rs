@@ -19,6 +19,7 @@ use native_tls_crate::TlsConnector;
 use pin_project_lite::pin_project;
 use std::future::Future;
 use std::pin::Pin;
+use std::slice::Iter;
 use std::task::{Context, Poll};
 use tokio::time::Sleep;
 
@@ -208,7 +209,7 @@ impl ClientBuilder {
                 https_only: false,
                 dns_overrides: HashMap::new(),
                 dns_resolver: None,
-                accept_header: true,
+                accept_header: false,
                 header_order: Vec::new()
             },
         }
@@ -1487,7 +1488,7 @@ impl ClientBuilder {
 
     /// Insert "accept: */*" header at the beginning.
     ///
-    /// Defaults to true.
+    /// Defaults to false.
     pub fn accept_header(mut self, enabled: bool) -> ClientBuilder {
         self.config.accept_header = enabled;
         self
@@ -1751,7 +1752,7 @@ impl Client {
 
         // Check if the cookie_store is set
         if let Some(cookie_store) = &self.inner.cookie_store {
-            let mut iter: core::slice::Iter<HeaderValue> = cookies.iter();
+            let mut iter: Iter<HeaderValue> = cookies.iter();
             let dynamic_iter: &mut dyn Iterator<Item = &HeaderValue> = &mut iter;
             cookie_store.set_cookies(dynamic_iter, &target_url);
             Ok(())
