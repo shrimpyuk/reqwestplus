@@ -1,6 +1,6 @@
 # reqwestplus
 
-A fork of [reqwest](https://github.com/seanmonstar/reqwest) and [reqwest-impersonate](https://github.com/4JX/reqwest-impersonate) containing additional features like TLS and h2 configurations.
+A fork of [reqwestplus](github.com/ignassew/reqwestplus) and [reqwest-impersonate](https://github.com/4JX/reqwest-impersonate) containing further patches updating the libraries patched more mainstream.
 
 This fork has features designed to match my specific usecase, and although open source, it isn't intended for general use. I can't guarantee API stability, or that any of additional features will make sense to you.
 
@@ -17,9 +17,8 @@ It is currently missing HTTP/2 `PRIORITY` support. (PRs to [h2](https://github.c
 
 ```toml
 [patch.crates-io]
-hyper = { git = "https://github.com/4JX/hyper.git", branch = "v0.14.18-patched" }
-h2 = { git = "https://github.com/4JX/h2.git", branch = "imp" }
-http = { git = "https://github.com/ignassew/http-ordered" }
+hyper = { git = "https://github.com/shrimpyuk/hyperplus.git", branch = "0.14.28-patched" }
+http = { git = "https://github.com/shrimpyuk/http-ordered.git" }
 ```
 
 These patches were made specifically for `reqwestplus` to work, but I would appreciate if someone took the time to PR more "proper" versions to the parent projects.
@@ -29,7 +28,7 @@ These patches were made specifically for `reqwestplus` to work, but I would appr
 `Cargo.toml`
 
 ```toml
-reqwestplus = { git = "https://github.com/ignassew/reqwestplus", default-features = false, features = [
+reqwest = { git = "https://github.com/shrimpyuk/reqwestplus", package = "reqwestplus", branch = "master", default-features = false, features = [
     "chrome",
     "blocking",
 ] }

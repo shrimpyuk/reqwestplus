@@ -31,6 +31,8 @@ use super::Body;
 #[cfg(feature = "__chrome")]
 use crate::browser::{configure_chrome, ChromeVersion};
 use crate::connect::Connector;
+#[cfg(feature = "__safari")]
+use crate::browser::{configure_safari, SafariVersion};
 #[cfg(feature = "cookies")]
 use crate::cookie;
 #[cfg(feature = "trust-dns")]
@@ -219,6 +221,12 @@ impl ClientBuilder {
     pub fn chrome_builder(self, ver: ChromeVersion) -> ClientBuilder {
         configure_chrome(ver, self)
     }
+
+    #[cfg(feature = "__safari")]
+    pub fn safari_builder(self, ver: SafariVersion) -> ClientBuilder {
+        configure_safari(ver, self)
+    }
+
     /// Returns a `Client` that uses this `ClientBuilder` configuration.
     ///
     /// # Errors

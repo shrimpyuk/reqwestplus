@@ -42,6 +42,8 @@ blocking = ["futures-util/io", "tokio/rt-multi-thread", "tokio/sync"]
 
 chrome = ["__chrome"]
 
+safari = ["__safari"]
+
 cookies = ["cookie_crate", "cookie_store", "proc-macro-hack"]
 
 gzip = ["async-compression", "async-compression/gzip", "tokio-util"]
@@ -80,6 +82,8 @@ __boring = [
 ]
 
 __chrome = ["__boring", "__browser_common"]
+
+__safari = ["__boring", "__browser_common"]
 
 __browser_common = ["brotli", "gzip"]
 

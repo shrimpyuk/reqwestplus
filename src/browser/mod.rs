@@ -14,6 +14,15 @@ mod chrome;
 #[cfg(feature = "__chrome")]
 pub(crate) use chrome::configure_chrome;
 
+#[cfg(feature = "__safari")]
+pub use safari::SafariVersion;
+
+#[cfg(feature = "__safari")]
+mod safari;
+
+#[cfg(feature = "__safari")]
+pub(crate) use safari::configure_safari;
+
 struct BrowserSettings {
     pub tls_builder_func: Arc<dyn Fn() -> SslConnectorBuilder + Send + Sync>,
     pub http2: Http2Data,

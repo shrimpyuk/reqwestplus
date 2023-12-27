@@ -18,6 +18,8 @@ use super::response::Response;
 use super::wait;
 #[cfg(feature = "__chrome")]
 use crate::browser::ChromeVersion;
+#[cfg(feature = "__safari")]
+use crate::browser::SafariVersion;
 #[cfg(feature = "__tls")]
 use crate::tls;
 #[cfg(feature = "__tls")]
@@ -94,6 +96,11 @@ impl ClientBuilder {
     #[cfg(feature = "__chrome")]
     pub fn chrome_builder(self, ver: ChromeVersion) -> ClientBuilder {
         self.with_inner(move |inner| inner.chrome_builder(ver))
+    }
+
+    #[cfg(feature = "__safari")]
+    pub fn safari_builder(self, ver: SafariVersion) -> ClientBuilder {
+        self.with_inner(move |inner| inner.safari_builder(ver))
     }
 
     /// Returns a `Client` that uses this `ClientBuilder` configuration.
